@@ -1,5 +1,10 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import path from 'path';
+
+import {init as channel, getChannels, getChannel, getVersion, getDownload} from '../models/channel';
+
+channel()
 
 dotenv.config()
 const router = express.Router();
@@ -7,7 +12,7 @@ const router = express.Router();
 router.route('/')
     .get((req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            res.send('GET /channel');
+            res.json(getChannels());
         }
         else {
             res.status(403).send('Forbidden');
@@ -17,7 +22,7 @@ router.route('/')
 router.route('/:channel')
     .get((req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            res.send(`GET /channel/${req.params.channel}`);
+            res.json(getChannel(req.params.channel));
         }
         else {
             res.status(403).send('Forbidden');
@@ -27,7 +32,7 @@ router.route('/:channel')
 router.route('/:channel/:version')
     .get((req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            res.send(`GET /channel/${req.params.channel}/${req.params.version}`);
+            res.json(getVersion(req.params.channel, req.params.version));
         }
         else {
             res.status(403).send('Forbidden');
@@ -37,7 +42,7 @@ router.route('/:channel/:version')
 router.route('/:channel/:version/download')
     .get((req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            res.send(`GET /channel/${req.params.channel}/${req.params.version}/download`);
+            res.download(path.join(getDownload(req.params.channel, req.params.version)));
         }
         else {
             res.status(403).send('Forbidden');
