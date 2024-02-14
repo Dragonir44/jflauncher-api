@@ -42,3 +42,30 @@ export const getVersion = (channel: string, versionName: string) => {
 export const getDownload = (channel: string, versionName: string) => {
     return getVersion(channel, versionName).Path
 }
+
+export const createChannel = (name: string) => {
+    const repoPath: string = "repo"
+    fs.mkdirSync(path.join(repoPath, name))
+
+    const channel: Channel = new Channel(name)
+    channels.push(channel)
+
+    return channel
+}
+
+export const createVersion = (channel: string, name: string, changelog: string, file: any) => {
+    const repoPath: string = "repo"
+    const versionPath = path.join(repoPath, channel, name) as string
+    fs.mkdirSync(versionPath)
+
+    fs.writeFileSync(path.join(versionPath, "changelog"), changelog)
+    fs.rename(path.join('uploads', file[0].originalname), path.join(versionPath, `${name}.zip`), (err)=>{
+        if(err) console.log(err)
+        console.log('file moved')
+    })
+
+    const version: Version = new Version(name, changelog, versionPath)
+    getChannel(channel).Version = version
+
+    return version
+}
