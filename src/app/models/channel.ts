@@ -8,6 +8,15 @@ var channels: Channel[] = []
 
 export const init = () => {
     const repoPath: string = "repo"
+    
+    if (!fs.existsSync(repoPath)) {
+        fs.mkdirSync(repoPath)
+    }
+
+    if (!fs.existsSync("uploads")) {
+        fs.mkdirSync("uploads")
+    }
+
     const repoContent: any = fs.readdirSync(path.join(repoPath))
 
     for(const folderName of repoContent) {
