@@ -2,3 +2,4 @@ node_modules/
 yarn.lock
 repo/
 uploads/
+dist/
