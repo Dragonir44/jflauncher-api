@@ -68,6 +68,10 @@ export const createVersion = (channel: string, name: string, changelog: string, 
     const latestVersion: string | boolean | undefined = fs.existsSync(path.join(channelPath, 'latest')) ? fs.readdirSync(path.join(channelPath, 'latest')).find((file: string) => file.endsWith('.zip')) : false
     const versionPath = path.join(repoPath, channel, name) as string
 
+    if (!fs.existsSync(channelPath)) {
+        createChannel(channel)
+    }
+
     // check if new version name is newer than latest version
     if(latestVersion) {
         const latestVersionName: string = latestVersion.split('.zip')[0]
@@ -92,10 +96,8 @@ export const createVersion = (channel: string, name: string, changelog: string, 
     fs.mkdirSync(versionPath)
 
     fs.writeFileSync(path.join(versionPath, "changelog"), changelog)
-    fs.rename(path.join('uploads', file[0].originalname), path.join(versionPath, `${name}.zip`), (err)=>{
-        if(err) console.log(err)
-        console.log('file moved')
-    })
+    fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(versionPath, `${name}.zip`))
+    fs.unlinkSync(path.join('uploads', file[0].originalname))
 
     const version: Version = new Version(name, changelog, versionPath)
     getChannel(channel).Version = version
