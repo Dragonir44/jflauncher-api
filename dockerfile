@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:20.9
+FROM node:21.6-slim 
 
 ARG PORT
 
