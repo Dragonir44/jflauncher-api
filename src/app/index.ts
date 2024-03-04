@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 // import routes
 import channelRoutes from './routes/channel';
 import addChannelRoutes from './routes/addChannel';
+import healthRoutes from './routes/health';
 
 // load environment variables
 dotenv.config()
@@ -14,5 +15,6 @@ app.use(express.json());
 // use routes
 app.use('/channel', channelRoutes);
 app.use('/addchannel', addChannelRoutes);
+app.use('/health', healthRoutes);
 
 export default app;
