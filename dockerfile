@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1
 FROM node:21.6-slim 
 
+RUN apt update && apt install -y curl; apt clean
+
 RUN mkdir /app
 
 WORKDIR /app
