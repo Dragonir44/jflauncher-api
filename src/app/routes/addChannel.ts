@@ -1,7 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import fs from 'fs';
-import path from 'path';
 import multer from 'multer';
 
 import { createChannel, createVersion } from '../models/channel';
