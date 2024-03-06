@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import channelRoutes from './routes/channel';
 import addChannelRoutes from './routes/addChannel';
 import healthRoutes from './routes/health';
+import removeRoutes from './routes/remove';
 
 // load environment variables
 dotenv.config()
@@ -16,5 +17,6 @@ app.use(express.json());
 app.use('/channel', channelRoutes);
 app.use('/addchannel', addChannelRoutes);
 app.use('/health', healthRoutes);
+app.use('/remove', removeRoutes);
 
 export default app;
