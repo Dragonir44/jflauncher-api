@@ -2,16 +2,23 @@ version: '3.3'
 services:
   web:
     container_name: "jfl-api"
+    healthcheck:
+      test: "curl -f http://localhost:5000/health || exit 1"
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
     build:
       context: .
       dockerfile: dockerfile
     environment:
       - "TZ=Europe/Paris"
+      - "TOKEN="
     restart: on-failure
     ports:
       - "5000:5000"
     volumes:
-      - ./test/repo:/root/repo
+      - ./test/repo:/app/repo
 
 volumes:
   repo:
