@@ -85,7 +85,10 @@ export const createVersion = (channel: string, name: string, changelog: string, 
         fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, 'latest', `${name}.zip`))
 
         // replace old changelog with new one
-        fs.writeFileSync(path.join(channelPath, 'latest', 'changelog'), changelog)
+        if (fs.existsSync(path.join(channelPath, 'latest', 'changelog')))
+            fs.unlinkSync(path.join(channelPath, 'latest', 'changelog'))
+
+        fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, 'latest', 'changelog'))
     }
     else {
         fs.mkdirSync(path.join(channelPath, 'latest'))
