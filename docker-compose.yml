@@ -12,13 +12,19 @@ services:
       context: .
       dockerfile: dockerfile
     environment:
-      - "TZ=Europe/Paris"
-      - "TOKEN="
+      TZ: Europe/Paris
+      TOKEN_FILE: /run/secrets/jfl-api-token
+    secrets:
+      - jfl-api-token
     restart: on-failure
     ports:
       - "5000:5000"
     volumes:
       - ./test/repo:/app/repo
+
+secrets:
+  jfl-api-token:
+    file: ./secrets/jfl-api-token.txt
 
 volumes:
   repo:
