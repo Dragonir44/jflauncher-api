@@ -10,8 +10,6 @@ if (fs.existsSync(<string>process.env.TOKEN_FILE)) {
   console.log('Token loaded from file')
 }
 
-console.log(process.env.TOKEN)
-
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
