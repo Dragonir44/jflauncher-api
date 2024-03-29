@@ -85,7 +85,10 @@ export const createVersion = (channel: string, name: string, changelog: string, 
         fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, 'latest', `${name}.zip`))
 
         // replace old changelog with new one
-        fs.writeFileSync(path.join(channelPath, 'latest', 'changelog'), changelog)
+        if (fs.existsSync(path.join(channelPath, 'latest', 'changelog')))
+            fs.unlinkSync(path.join(channelPath, 'latest', 'changelog'))
+
+        fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, 'latest', 'changelog'))
     }
     else {
         fs.mkdirSync(path.join(channelPath, 'latest'))
@@ -103,4 +106,53 @@ export const createVersion = (channel: string, name: string, changelog: string, 
     getChannel(channel).Version = version
 
     return version
+}
+
+export const deleteChannel = (name: string) => {
+    const repoPath: string = "repo"
+    const channelPath: string = path.join(repoPath, name)
+
+    if (fs.existsSync(channelPath)) {
+        fs.rmdirSync(channelPath, { recursive: true })
+    }
+
+    init()
+
+    return true
+}
+
+export const deleteVersion = (channelName: string, name: string) => {
+    const repoPath: string = "repo"
+    const channelPath: string = path.join(repoPath, channelName)
+    const versionPath: string = path.join(repoPath, channelName, name)
+    const latestVersion: string | boolean | undefined = fs.existsSync(path.join(channelPath, 'latest')) ? fs.readdirSync(path.join(channelPath, 'latest')).find((file: string) => file.endsWith('.zip')) : false
+
+    if (fs.existsSync(versionPath))
+        fs.rmdirSync(versionPath, { recursive: true })
+
+    if (latestVersion) {
+        let lastVersion: string = ''
+        fs.rmdirSync(path.join(channelPath, 'latest'), { recursive: true })
+        
+        if (fs.readdirSync(channelPath).length > 0) {
+            fs.readdirSync(path.join(repoPath, channelName)).forEach((version: string) => {
+
+                if (!lastVersion) {
+                    lastVersion = version
+                }
+                else {
+                    if (lastVersion < version) {
+                        lastVersion = version
+                    }
+                }
+            })
+            fs.mkdirSync(path.join(channelPath, 'latest'))
+            fs.copyFileSync(path.join(repoPath, channelName, lastVersion, `${lastVersion}.zip`), path.join(channelPath, 'latest', `${lastVersion}.zip`))
+            fs.copyFileSync(path.join(repoPath, channelName, lastVersion, 'changelog'), path.join(channelPath, 'latest', 'changelog'))
+        }
+        
+        init()
+    }
+   
+    return true
 }
