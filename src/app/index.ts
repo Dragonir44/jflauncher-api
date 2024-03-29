@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json());
 
 // use routes
-app.use('/channel', channelRoutes);
+app.use('/channels', channelRoutes);
 app.use('/addchannel', addChannelRoutes);
 
 export default app;
