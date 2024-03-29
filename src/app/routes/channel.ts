@@ -4,7 +4,19 @@ import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
 
-import {init as channel, getChannels, getChannel, getVersion, getDownload, createChannel, createVersion } from '../models/channel';
+import {
+    init as channel, 
+    getChannels, 
+    getChannel, 
+    createChannel, 
+    updateChannel,
+    deleteChannel,
+    getVersion, 
+    createVersion, 
+    updateVersion,
+    deleteVersion,
+    getDownload
+} from '../models/channel';
 
 channel()
 
@@ -32,8 +44,9 @@ router.route('/')
             res.status(403).send('Forbidden');
         }
     })
-    .post(upload.array('files', 1), (req, res) => {
+    .post((req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
+            console.log(req.body.name)
             res.json(createChannel(req.body.name));
         }
         else {
@@ -45,6 +58,23 @@ router.route('/:channel')
     .get((req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
             res.json(getChannel(req.params.channel));
+        }
+        else {
+            res.status(403).send('Forbidden');
+        }
+    })
+    .put((req, res) => {
+        if (req.headers['token'] === process.env.TOKEN) {
+            updateChannel(req.params.channel, req.body.name);
+            res.json(getChannel(req.params.channel));
+        }
+        else {
+            res.status(403).send('Forbidden');
+        }
+    })
+    .delete((req, res) => {
+        if (req.headers['token'] === process.env.TOKEN) {
+            res.json(deleteChannel(req.params.channel));
         }
         else {
             res.status(403).send('Forbidden');
@@ -62,7 +92,7 @@ router.route('/:channel/versions')
     })
     .post(upload.array('files', 1), (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            res.json(createVersion(req.body.channel, req.body.name, req.body.changelog, req.files));
+            res.json(createVersion(req.params.channel, req.body.name, req.body.changelog, req.files));
         }
         else {
             res.status(403).send('Forbidden');
@@ -73,6 +103,37 @@ router.route('/:channel/versions/:version')
     .get((req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
             res.json(getVersion(req.params.channel, req.params.version));
+        }
+        else {
+            res.status(403).send('Forbidden');
+        }
+    })
+    .put(upload.array('files', 1), async (req, res) => {
+        if (req.headers['token'] === process.env.TOKEN) {
+            const { newName, changelog, files } = req.body
+            const { channel, version } = req.params
+
+            if (newName) {
+                await updateVersion(channel, version, newName)
+            }
+
+            if (changelog) {
+                await updateVersion(channel, version, undefined, changelog)
+            }
+
+            if (files) {
+                await updateVersion(channel, version, undefined, undefined, files)
+            }
+
+            res.json(getVersion(channel, version));
+        }
+        else {
+            res.status(403).send('Forbidden');
+        }
+    })
+    .delete((req, res) => {
+        if (req.headers['token'] === process.env.TOKEN) {
+            res.json(deleteVersion(req.params.channel, req.params.version));
         }
         else {
             res.status(403).send('Forbidden');

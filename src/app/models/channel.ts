@@ -8,6 +8,7 @@ var channels: Channel[] = []
 
 export const init = () => {
     const repoPath: string = "repo"
+    channels = []
     
     if (!fs.existsSync(repoPath)) {
         fs.mkdirSync(repoPath)
@@ -34,22 +35,11 @@ export const init = () => {
 
         channels.push(channel)
     }
+    console.log(channels)
 }
 
 export const getChannels = () => {
     return channels
-}
-
-export const getChannel = (name: string) => {
-    return channels.filter((channel: Channel) => channel.ChannelName === name)[0]
-}
-
-export const getVersion = (channel: string, versionName: string) => {
-    return getChannel(channel).Version.filter((version: Version) => version.Version === versionName)[0]
-}
-
-export const getDownload = (channel: string, versionName: string) => {
-    return getVersion(channel, versionName).Path
 }
 
 export const createChannel = (name: string) => {
@@ -60,6 +50,37 @@ export const createChannel = (name: string) => {
     channels.push(channel)
 
     return channel
+}
+
+export const getChannel = (name: string) => {
+    return channels.filter((channel: Channel) => channel.ChannelName === name)[0]
+}
+
+export const updateChannel = async (name: string, newName: string) => {
+    const repoPath: string = "repo"
+    const channelPath: string = path.join(repoPath, name)
+    const newChannelPath: string = path.join(repoPath, newName)
+
+    if (fs.existsSync(channelPath)) {
+        await fs.renameSync(channelPath, newChannelPath)
+    }
+
+    init()
+
+    return true
+}
+
+export const deleteChannel = (name: string) => {
+    const repoPath: string = "repo"
+    const channelPath: string = path.join(repoPath, name)
+
+    if (fs.existsSync(channelPath)) {
+        fs.rmdirSync(channelPath, { recursive: true })
+    }
+
+    init()
+
+    return true
 }
 
 export const createVersion = (channel: string, name: string, changelog: string, file: any) => {
@@ -108,12 +129,32 @@ export const createVersion = (channel: string, name: string, changelog: string, 
     return version
 }
 
-export const deleteChannel = (name: string) => {
-    const repoPath: string = "repo"
-    const channelPath: string = path.join(repoPath, name)
+export const getVersion = (channel: string, versionName: string) => {
+    return getChannel(channel).Version.filter((version: Version) => version.Version === versionName)[0]
+}
 
-    if (fs.existsSync(channelPath)) {
-        fs.rmdirSync(channelPath, { recursive: true })
+export const updateVersion = (channelName: string, name: string, newName?: string, changelog?: string, file?: any) => {
+    const repoPath: string = "repo"
+    const channelPath: string = path.join(repoPath, channelName)
+    const versionPath: string = path.join(channelPath, name)
+    const latestVersion: string | boolean | undefined = fs.existsSync(path.join(channelPath, 'latest')) ? fs.readdirSync(path.join(channelPath, 'latest')).find((file: string) => file.endsWith('.zip')) : false
+    
+    if (newName) {
+        if (name === "latest" && typeof latestVersion == "string") {
+            fs.renameSync(path.join(versionPath, name, latestVersion), path.join(versionPath, `${newName}.zip`))
+        }
+        else {
+            fs.renameSync(path.join(versionPath), path.join(channelPath, newName))
+        }
+    }
+
+    if (changelog) {
+        fs.writeFileSync(path.join(channelPath, newName ? newName : name, "changelog"), changelog)
+    }
+
+    if (file) {
+        fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, newName ? newName : name, `${newName ? newName : name}.zip`))
+        fs.unlinkSync(path.join('uploads', file[0].originalname))
     }
 
     init()
@@ -155,4 +196,8 @@ export const deleteVersion = (channelName: string, name: string) => {
     }
    
     return true
+}
+
+export const getDownload = (channel: string, versionName: string) => {
+    return getVersion(channel, versionName).Path
 }
