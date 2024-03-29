@@ -8,9 +8,10 @@ services:
       timeout: 30s
       retries: 5
       start_period: 30s
-    build:
-      context: .
-      dockerfile: dockerfile
+    image: dragonir/jfl-api
+    # build:
+    #   context: .
+    #   dockerfile: dockerfile
     environment:
       TZ: Europe/Paris
       TOKEN_FILE: /run/secrets/jfl-api-token
