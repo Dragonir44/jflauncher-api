@@ -96,20 +96,19 @@ export const createVersion = (channel: string, name: string, changelog: string, 
     // check if new version name is newer than latest version
     if(latestVersion) {
         const latestVersionName: string = latestVersion.split('.zip')[0]
-        if(latestVersionName >= name) {
-            return false
+        if(latestVersionName <= name) {
+            // remove old latest file
+            fs.unlinkSync(path.join(channelPath, 'latest', latestVersion))
+
+            // copy new latest file
+            fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, 'latest', `${name}.zip`))
+
+            // replace old changelog with new one
+            if (fs.existsSync(path.join(channelPath, 'latest', 'changelog')))
+                fs.unlinkSync(path.join(channelPath, 'latest', 'changelog'))
+
+            fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, 'latest', 'changelog'))
         }
-        // remove old latest file
-        fs.unlinkSync(path.join(channelPath, 'latest', latestVersion))
-
-        // copy new latest file
-        fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, 'latest', `${name}.zip`))
-
-        // replace old changelog with new one
-        if (fs.existsSync(path.join(channelPath, 'latest', 'changelog')))
-            fs.unlinkSync(path.join(channelPath, 'latest', 'changelog'))
-
-        fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, 'latest', 'changelog'))
     }
     else {
         fs.mkdirSync(path.join(channelPath, 'latest'))
