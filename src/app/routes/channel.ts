@@ -92,7 +92,7 @@ router.route('/:channel/versions')
     })
     .post(upload.array('files', 1), (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            res.json(createVersion(req.params.channel, req.body.name, req.body.changelog, req.files));
+            res.json(createVersion(req.params.channel, req.body.name, req.body.changelog, req.files, req.body.forgeVersion));
         }
         else {
             res.status(403).send('Forbidden');
@@ -110,7 +110,7 @@ router.route('/:channel/versions/:version')
     })
     .put(upload.array('files', 1), async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            const { newName, changelog, files } = req.body
+            const { newName, changelog, files, forgeVersion } = req.body
             const { channel, version } = req.params
 
             if (newName) {
@@ -123,6 +123,10 @@ router.route('/:channel/versions/:version')
 
             if (files) {
                 await updateVersion(channel, version, undefined, undefined, files)
+            }
+
+            if (forgeVersion) {
+                await updateVersion(channel, version, undefined, undefined, undefined, forgeVersion)
             }
 
             res.json(getVersion(channel, version));

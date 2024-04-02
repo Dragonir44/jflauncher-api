@@ -29,13 +29,13 @@ export const init = () => {
             const regex = new RegExp(/.*\.zip$/)
             const filePath: string = fs.readdirSync(path.join(repoPath, folderName, subFolderName)).filter((file: string) => regex.test(file))[0]
             const fileContent: any = fs.existsSync(path.join(repoPath, folderName, subFolderName, "changelog")) ? fs.readFileSync(path.join(repoPath, folderName, subFolderName, "changelog"), "utf8") : undefined
-            const version: Version = new Version(subFolderName, fileContent, path.join(repoPath, folderName, subFolderName, filePath))
+            const forgeVersion: string = fs.readdirSync(path.join(repoPath, folderName, subFolderName)).filter((file: string) => new RegExp(/[0-9]{2}\.[0-9]{1}\.[0-9]{2}/).test(file))[0]
+            const version: Version = new Version(subFolderName, fileContent, path.join(repoPath, folderName, subFolderName, filePath), forgeVersion)
             channel.Version = version
         }
 
         channels.push(channel)
     }
-    console.log(channels)
 }
 
 export const getChannels = () => {
@@ -83,7 +83,7 @@ export const deleteChannel = (name: string) => {
     return true
 }
 
-export const createVersion = (channel: string, name: string, changelog: string, file: any) => {
+export const createVersion = (channel: string, name: string, changelog: string, file: any, forgeVersion: string) => {
     const repoPath: string = "repo"
     const channelPath: string = path.join(repoPath, channel)
     const latestVersion: string | boolean | undefined = fs.existsSync(path.join(channelPath, 'latest')) ? fs.readdirSync(path.join(channelPath, 'latest')).find((file: string) => file.endsWith('.zip')) : false
@@ -111,18 +111,25 @@ export const createVersion = (channel: string, name: string, changelog: string, 
         }
     }
     else {
-        fs.mkdirSync(path.join(channelPath, 'latest'))
+        try {
+            fs.mkdirSync(path.join(channelPath, 'latest'))
+        }
+        catch (e) {
+            console.log(e)
+        }
         fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, 'latest', `${name}.zip`))
         fs.writeFileSync(path.join(channelPath, 'latest', 'changelog'), changelog)
+        fs.writeFileSync(path.join(channelPath, 'latest', forgeVersion), "")
     }
 
     fs.mkdirSync(versionPath)
 
     fs.writeFileSync(path.join(versionPath, "changelog"), changelog)
+    fs.writeFileSync(path.join(versionPath, forgeVersion), "")
     fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(versionPath, `${name}.zip`))
     fs.unlinkSync(path.join('uploads', file[0].originalname))
 
-    const version: Version = new Version(name, changelog, versionPath)
+    const version: Version = new Version(name, changelog, versionPath, forgeVersion)
     getChannel(channel).Version = version
 
     return version
@@ -132,7 +139,7 @@ export const getVersion = (channel: string, versionName: string) => {
     return getChannel(channel).Version.filter((version: Version) => version.Version === versionName)[0]
 }
 
-export const updateVersion = (channelName: string, name: string, newName?: string, changelog?: string, file?: any) => {
+export const updateVersion = (channelName: string, name: string, newName?: string, changelog?: string, file?: any, forgeVersion?: string) => {
     const repoPath: string = "repo"
     const channelPath: string = path.join(repoPath, channelName)
     const versionPath: string = path.join(channelPath, name)
@@ -154,6 +161,14 @@ export const updateVersion = (channelName: string, name: string, newName?: strin
     if (file) {
         fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, newName ? newName : name, `${newName ? newName : name}.zip`))
         fs.unlinkSync(path.join('uploads', file[0].originalname))
+    }
+
+    if (forgeVersion) {
+        const currentForgeVersion: string = fs.readdirSync(path.join(channelPath, newName ? newName : name)).filter((file: string) => new RegExp(/[0-9]{2}\.[0-9]{1}\.[0-9]{2}/).test(file))[0]
+        if (currentForgeVersion) 
+            fs.unlinkSync(path.join(channelPath, newName ? newName : name, currentForgeVersion))
+        
+        fs.writeFileSync(path.join(channelPath, newName ? newName : name, forgeVersion), "")
     }
 
     init()
