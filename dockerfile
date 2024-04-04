@@ -11,16 +11,14 @@ WORKDIR /app
 
 RUN mkdir uploads
 
-COPY ./src ./src
+COPY ./dist ./dist
 COPY ./package.json ./package.json
-COPY ./tsconfig.json ./tsconfig.json
 
 RUN echo "PORT=5000" > .env
 RUN echo "TOKEN_FILE=${TOKEN_FILE}" >> .env
 
 EXPOSE 5000
 
-RUN npm install
-RUN npm run build
+RUN npm install --production
 
 CMD ["npm", "start"]

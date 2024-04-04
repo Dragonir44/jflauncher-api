@@ -2,7 +2,7 @@
   "name": "jflauncher-api",
   "version": "1.2.1",
   "description": "Listing and download modpack version api",
-  "main": "src/server.ts",
+  "main": "dist/server.js",
   "repository": "https://github.com/dragonir44/jflauncher-api",
   "author": "dragonir44",
   "license": "MIT",
@@ -10,8 +10,7 @@
   "scripts": {
     "start": "node dist/server.js",
     "dev": "nodemon --exec ts-node src/server.ts --watch src --ext ts",
-    "build": "tsc -p .",
-    "prestart": "npm run build"
+    "build": "tsc -p ."
   },
   "dependencies": {
     "buffer-split": "^1.0.0",
