@@ -1,10 +1,21 @@
 import fs from 'fs';
 import path from 'path';
+import bsplit from 'buffer-split';
 
 import { Channel } from '../classes/Channel';
 import { Version } from '../classes/Version';
 
 var channels: Channel[] = []
+
+function readLineJSON(path: string) {
+    const buf = fs.readFileSync(path); // omitting encoding returns a Buffer
+    const delim = Buffer.from('\n');
+    const result: any = bsplit(buf, delim);
+    return result
+      .map((x: any) => x.toString())
+      .filter((x: any) => x !== "")
+    //   .map(JSON.parse);
+}
 
 export const init = () => {
     const repoPath: string = "repo"
@@ -28,7 +39,8 @@ export const init = () => {
         for(const subFolderName of folderContent) {
             const regex = new RegExp(/.*\.zip$/)
             const filePath: string = fs.readdirSync(path.join(repoPath, folderName, subFolderName)).filter((file: string) => regex.test(file))[0]
-            const fileContent: any = fs.existsSync(path.join(repoPath, folderName, subFolderName, "changelog")) ? fs.readFileSync(path.join(repoPath, folderName, subFolderName, "changelog"), "utf8") : undefined
+            const changelog: any = fs.existsSync(path.join(repoPath, folderName, subFolderName, "changelog")) ? path.join(repoPath, folderName, subFolderName, "changelog") : false
+            const fileContent: string = readLineJSON(changelog)
             const forgeVersion: string = fs.readdirSync(path.join(repoPath, folderName, subFolderName)).filter((file: string) => new RegExp(/[0-9]{2}\.[0-9]{1}\.[0-9]{2}/).test(file))[0]
             const version: Version = new Version(subFolderName, fileContent, path.join(repoPath, folderName, subFolderName, filePath), forgeVersion)
             channel.Version = version
@@ -107,7 +119,7 @@ export const createVersion = (channel: string, name: string, changelog: string, 
             if (fs.existsSync(path.join(channelPath, 'latest', 'changelog')))
                 fs.unlinkSync(path.join(channelPath, 'latest', 'changelog'))
 
-            fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, 'latest', 'changelog'))
+            fs.writeFileSync(path.join(channelPath, 'latest', 'changelog'), changelog)
         }
     }
     else {
@@ -164,7 +176,7 @@ export const updateVersion = (channelName: string, name: string, newName?: strin
     }
 
     if (forgeVersion) {
-        const currentForgeVersion: string = fs.readdirSync(path.join(channelPath, newName ? newName : name)).filter((file: string) => new RegExp(/[0-9]{2}\.[0-9]{1}\.[0-9]{2}/).test(file))[0]
+        const currentForgeVersion: string = fs.readdirSync(path.join(channelPath, newName ? newName : name)).filter((file: string) => new RegExp(/1\.20\.1-[0-9]{2}\.[0-9]{1}\.[0-9]{1,2}/).test(file))[0]
         if (currentForgeVersion) 
             fs.unlinkSync(path.join(channelPath, newName ? newName : name, currentForgeVersion))
         

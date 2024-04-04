@@ -46,7 +46,6 @@ router.route('/')
     })
     .post((req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            console.log(req.body.name)
             res.json(createChannel(req.body.name));
         }
         else {
@@ -124,8 +123,10 @@ router.route('/:channel/versions/:version')
             if (files) {
                 await updateVersion(channel, version, undefined, undefined, files)
             }
-
+            
             if (forgeVersion) {
+                if (!new RegExp(/1\.20\.1-[0-9]{2}\.[0-9]{1}\.[0-9]{1,2}/).test(forgeVersion))
+                    return res.status(400).send('Bad Request format');
                 await updateVersion(channel, version, undefined, undefined, undefined, forgeVersion)
             }
 

@@ -4,11 +4,11 @@ export class Version {
     protected path: string;
     protected forgeVersion: string;
     
-    constructor(version: string, changelog: string, path: string, forgeVersion: string) {
+    constructor(version: string, changelog: string, path: string, forgeVersion?: string) {
         this.version = version;
         this.changelog = changelog;
         this.path = path;
-        this.forgeVersion = forgeVersion;
+        this.forgeVersion = forgeVersion || "none";
     }
 
     get Version() {
