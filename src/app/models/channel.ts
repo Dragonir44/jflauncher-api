@@ -142,7 +142,8 @@ export const createVersion = (channel: string, name: string, changelog: string, 
     fs.unlinkSync(path.join('uploads', file[0].originalname))
 
     const version: Version = new Version(name, changelog, versionPath, forgeVersion)
-    getChannel(channel).Version = version
+    
+    init()
 
     return version
 }
