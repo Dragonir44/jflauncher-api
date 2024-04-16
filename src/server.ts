@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import app from './app/index';
 import fs from 'fs';
+import swaggerDocs from './app/routes/swagger';
 
 // load environment variables
 dotenv.config()
@@ -14,4 +15,5 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  swaggerDocs(app, Number(PORT));
 });

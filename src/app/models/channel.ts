@@ -1,24 +1,20 @@
 import fs from 'fs';
 import path from 'path';
-import bsplit from 'buffer-split';
 
 import { Channel } from '../classes/Channel';
 import { Version } from '../classes/Version';
+import { Changelog } from '../classes/Changelog';
 
 var channels: Channel[] = []
+const repoPath: string = "repo/game"
 
-function readLineJSON(path: string) {
-    const buf = fs.readFileSync(path); // omitting encoding returns a Buffer
-    const delim = Buffer.from('\n');
-    const result: any = bsplit(buf, delim);
-    return result
-      .map((x: any) => x.toString())
-      .filter((x: any) => x !== "")
-    //   .map(JSON.parse);
+async function readChangelogFiles(path: string) {
+    const changelogFiles: any = fs.readdirSync(path)
+    return new Changelog(fs.readFileSync(path + "/" + changelogFiles[0], 'utf8'), fs.readFileSync(path + "/" + changelogFiles[1], 'utf8'))
 }
 
-export const init = () => {
-    const repoPath: string = "repo"
+export const init = async () => {
+    
     channels = []
     
     if (!fs.existsSync(repoPath)) {
@@ -39,8 +35,8 @@ export const init = () => {
         for(const subFolderName of folderContent) {
             const regex = new RegExp(/.*\.zip$/)
             const filePath: string = fs.readdirSync(path.join(repoPath, folderName, subFolderName)).filter((file: string) => regex.test(file))[0]
-            const changelog: any = fs.existsSync(path.join(repoPath, folderName, subFolderName, "changelog")) ? path.join(repoPath, folderName, subFolderName, "changelog") : false
-            const fileContent: string = readLineJSON(changelog)
+            const changelog: any = fs.existsSync(path.join(repoPath, folderName, subFolderName, "changelogs")) ? path.join(repoPath, folderName, subFolderName, "changelogs") : false
+            const fileContent: Changelog = await readChangelogFiles(changelog)
             const forgeVersion: string = fs.readdirSync(path.join(repoPath, folderName, subFolderName)).filter((file: string) => new RegExp(/[0-9]{2}\.[0-9]{1}\.[0-9]{2}/).test(file))[0]
             const version: Version = new Version(subFolderName, fileContent, path.join(repoPath, folderName, subFolderName, filePath), forgeVersion)
             channel.Version = version
@@ -55,7 +51,7 @@ export const getChannels = () => {
 }
 
 export const createChannel = (name: string) => {
-    const repoPath: string = "repo"
+    
     fs.mkdirSync(path.join(repoPath, name))
 
     const channel: Channel = new Channel(name)
@@ -65,38 +61,44 @@ export const createChannel = (name: string) => {
 }
 
 export const getChannel = (name: string) => {
-    return channels.filter((channel: Channel) => channel.ChannelName === name)[0]
+    const channel: Channel = channels.filter((channel: Channel) => channel.ChannelName === name)[0]
+    if (channel)
+     return channel
+
+    throw new Error("Channel not found")
 }
 
 export const updateChannel = async (name: string, newName: string) => {
-    const repoPath: string = "repo"
+    
     const channelPath: string = path.join(repoPath, name)
     const newChannelPath: string = path.join(repoPath, newName)
-
+    
     if (fs.existsSync(channelPath)) {
         await fs.renameSync(channelPath, newChannelPath)
+        init()
+
+        return true
     }
 
-    init()
-
-    return true
+    throw new Error("Channel not found")
 }
 
 export const deleteChannel = (name: string) => {
-    const repoPath: string = "repo"
+    
     const channelPath: string = path.join(repoPath, name)
 
     if (fs.existsSync(channelPath)) {
         fs.rmdirSync(channelPath, { recursive: true })
+        init()
+
+        return true
     }
 
-    init()
-
-    return true
+    throw new Error("Channel not found")
 }
 
-export const createVersion = (channel: string, name: string, changelog: string, file: any, forgeVersion: string) => {
-    const repoPath: string = "repo"
+export const createVersion = (channel: string, name: string, changelogs: Changelog, file: any, forgeVersion: string) => {
+    
     const channelPath: string = path.join(repoPath, channel)
     const latestVersion: string | boolean | undefined = fs.existsSync(path.join(channelPath, 'latest')) ? fs.readdirSync(path.join(channelPath, 'latest')).find((file: string) => file.endsWith('.zip')) : false
     const versionPath = path.join(repoPath, channel, name) as string
@@ -116,10 +118,12 @@ export const createVersion = (channel: string, name: string, changelog: string, 
             fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, 'latest', `${name}.zip`))
 
             // replace old changelog with new one
-            if (fs.existsSync(path.join(channelPath, 'latest', 'changelog')))
-                fs.unlinkSync(path.join(channelPath, 'latest', 'changelog'))
+            if (fs.existsSync(path.join(channelPath, 'latest', 'changelogs')))
+                fs.unlinkSync(path.join(channelPath, 'latest', 'changelogs'))
 
-            fs.writeFileSync(path.join(channelPath, 'latest', 'changelog'), changelog)
+            for (const changelog of changelogs) {
+                fs.writeFileSync(path.join(channelPath, 'latest', 'changelogs', changelog), changelog)
+            }
         }
     }
     else {
@@ -130,18 +134,22 @@ export const createVersion = (channel: string, name: string, changelog: string, 
             console.log(e)
         }
         fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, 'latest', `${name}.zip`))
-        fs.writeFileSync(path.join(channelPath, 'latest', 'changelog'), changelog)
+        for (const changelog of changelogs) {
+            fs.writeFileSync(path.join(channelPath, 'latest', 'changelogs', changelog), changelog)
+        }
         fs.writeFileSync(path.join(channelPath, 'latest', forgeVersion), "")
     }
 
     fs.mkdirSync(versionPath)
 
-    fs.writeFileSync(path.join(versionPath, "changelog"), changelog)
+    for (const changelog of changelogs) {
+        fs.writeFileSync(path.join(versionPath, "changelog"), changelog)
+    }
     fs.writeFileSync(path.join(versionPath, forgeVersion), "")
     fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(versionPath, `${name}.zip`))
     fs.unlinkSync(path.join('uploads', file[0].originalname))
 
-    const version: Version = new Version(name, changelog, versionPath, forgeVersion)
+    const version: Version = new Version(name, changelogs, versionPath, forgeVersion)
     
     init()
 
@@ -153,76 +161,82 @@ export const getVersion = (channel: string, versionName: string) => {
 }
 
 export const updateVersion = (channelName: string, name: string, newName?: string, changelog?: string, file?: any, forgeVersion?: string) => {
-    const repoPath: string = "repo"
+    
     const channelPath: string = path.join(repoPath, channelName)
     const versionPath: string = path.join(channelPath, name)
     const latestVersion: string | boolean | undefined = fs.existsSync(path.join(channelPath, 'latest')) ? fs.readdirSync(path.join(channelPath, 'latest')).find((file: string) => file.endsWith('.zip')) : false
     
-    if (newName) {
-        if (name === "latest" && typeof latestVersion == "string") {
-            fs.renameSync(path.join(versionPath, name, latestVersion), path.join(versionPath, `${newName}.zip`))
+    if (fs.existsSync(versionPath)) {
+        if (newName) {
+            if (name === "latest" && typeof latestVersion == "string") {
+                fs.renameSync(path.join(versionPath, name, latestVersion), path.join(versionPath, `${newName}.zip`))
+            }
+            else {
+                fs.renameSync(path.join(versionPath), path.join(channelPath, newName))
+            }
         }
-        else {
-            fs.renameSync(path.join(versionPath), path.join(channelPath, newName))
+    
+        if (changelog) {
+            fs.writeFileSync(path.join(channelPath, newName ? newName : name, "changelog"), changelog)
         }
+    
+        if (file) {
+            fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, newName ? newName : name, `${newName ? newName : name}.zip`))
+            fs.unlinkSync(path.join('uploads', file[0].originalname))
+        }
+    
+        if (forgeVersion) {
+            const currentForgeVersion: string = fs.readdirSync(path.join(channelPath, newName ? newName : name)).filter((file: string) => new RegExp(/1\.20\.1-[0-9]{2}\.[0-9]{1}\.[0-9]{1,2}/).test(file))[0]
+            if (currentForgeVersion) 
+                fs.unlinkSync(path.join(channelPath, newName ? newName : name, currentForgeVersion))
+            
+            fs.writeFileSync(path.join(channelPath, newName ? newName : name, forgeVersion), "")
+        }
+    
+        init()
+    
+        return true
     }
 
-    if (changelog) {
-        fs.writeFileSync(path.join(channelPath, newName ? newName : name, "changelog"), changelog)
-    }
-
-    if (file) {
-        fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, newName ? newName : name, `${newName ? newName : name}.zip`))
-        fs.unlinkSync(path.join('uploads', file[0].originalname))
-    }
-
-    if (forgeVersion) {
-        const currentForgeVersion: string = fs.readdirSync(path.join(channelPath, newName ? newName : name)).filter((file: string) => new RegExp(/1\.20\.1-[0-9]{2}\.[0-9]{1}\.[0-9]{1,2}/).test(file))[0]
-        if (currentForgeVersion) 
-            fs.unlinkSync(path.join(channelPath, newName ? newName : name, currentForgeVersion))
-        
-        fs.writeFileSync(path.join(channelPath, newName ? newName : name, forgeVersion), "")
-    }
-
-    init()
-
-    return true
+    throw new Error("Version not found")
 }
 
 export const deleteVersion = (channelName: string, name: string) => {
-    const repoPath: string = "repo"
     const channelPath: string = path.join(repoPath, channelName)
     const versionPath: string = path.join(repoPath, channelName, name)
     const latestVersion: string | boolean | undefined = fs.existsSync(path.join(channelPath, 'latest')) ? fs.readdirSync(path.join(channelPath, 'latest')).find((file: string) => file.endsWith('.zip')) : false
 
-    if (fs.existsSync(versionPath))
+    if (fs.existsSync(versionPath)) {
         fs.rmdirSync(versionPath, { recursive: true })
 
-    if (latestVersion) {
-        let lastVersion: string = ''
-        fs.rmdirSync(path.join(channelPath, 'latest'), { recursive: true })
-        
-        if (fs.readdirSync(channelPath).length > 0) {
-            fs.readdirSync(path.join(repoPath, channelName)).forEach((version: string) => {
-
-                if (!lastVersion) {
-                    lastVersion = version
-                }
-                else {
-                    if (lastVersion < version) {
+        if (latestVersion) {
+            let lastVersion: string = ''
+            fs.rmdirSync(path.join(channelPath, 'latest'), { recursive: true })
+            
+            if (fs.readdirSync(channelPath).length > 0) {
+                fs.readdirSync(path.join(repoPath, channelName)).forEach((version: string) => {
+    
+                    if (!lastVersion) {
                         lastVersion = version
                     }
-                }
-            })
-            fs.mkdirSync(path.join(channelPath, 'latest'))
-            fs.copyFileSync(path.join(repoPath, channelName, lastVersion, `${lastVersion}.zip`), path.join(channelPath, 'latest', `${lastVersion}.zip`))
-            fs.copyFileSync(path.join(repoPath, channelName, lastVersion, 'changelog'), path.join(channelPath, 'latest', 'changelog'))
+                    else {
+                        if (lastVersion < version) {
+                            lastVersion = version
+                        }
+                    }
+                })
+                fs.mkdirSync(path.join(channelPath, 'latest'))
+                fs.copyFileSync(path.join(repoPath, channelName, lastVersion, `${lastVersion}.zip`), path.join(channelPath, 'latest', `${lastVersion}.zip`))
+                fs.copyFileSync(path.join(repoPath, channelName, lastVersion, 'changelog'), path.join(channelPath, 'latest', 'changelog'))
+            }
+            
+            init()
         }
-        
-        init()
+       
+        return true
     }
-   
-    return true
+    
+    throw new Error("Version not found")
 }
 
 export const getDownload = (channel: string, versionName: string) => {
