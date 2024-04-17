@@ -4,8 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
 
-import {
-    init as channel, 
+import { 
     getChannels, 
     getChannel, 
     createChannel, 
@@ -16,11 +15,9 @@ import {
     updateVersion,
     deleteVersion,
     getDownload
-} from '../models/channel';
+} from '../services/channel.service';
 
 import { getVersionResponse } from '../schema/channel.schema';
-
-channel()
 
 
 const storage = multer.diskStorage({ // Initialise le stockage des fichiers
