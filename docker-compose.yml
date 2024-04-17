@@ -2,12 +2,6 @@ version: '3.3'
 services:
   web:
     container_name: "jfl-api"
-    healthcheck:
-      test: "curl -f http://localhost:5000/health || exit 1"
-      interval: 1m30s
-      timeout: 30s
-      retries: 5
-      start_period: 30s
     image: dragonir/jfl-api
     # build:
     #   context: .
@@ -15,6 +9,9 @@ services:
     environment:
       TZ: Europe/Paris
       TOKEN_FILE: /run/secrets/jfl-api-token
+      MONGO_URI: mongodb://db:27017/jfl
+    depends_on:
+      - db
     secrets:
       - jfl-api-token
     restart: on-failure
@@ -22,6 +19,29 @@ services:
       - "5000:5000"
     volumes:
       - ./test/repo:/app/repo
+    healthcheck:
+      test: "curl -f http://localhost:5000/health || exit 1"
+      interval: 1m
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+  
+  db:
+    container_name: "jfl-db"
+    image: mongo:latest
+    environment:
+      - PUID=1000
+      - PGID=1000
+    restart: unless-stopped
+    volumes:
+      - ./test/db:/data/db
+    healthcheck:
+      test: "mongosh --quiet 127.0.0.1/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'"
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    
 
 secrets:
   jfl-api-token:
@@ -29,3 +49,4 @@ secrets:
 
 volumes:
   repo:
+  db:
