@@ -2,8 +2,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 
 // import routes
-import channelRoutes from './routes/channel';
-import healthRoutes from './routes/health';
+import channelRoutes from './routes/channel.router';
+import healthRoutes from './routes/health.router';
 
 // load environment variables
 dotenv.config()
