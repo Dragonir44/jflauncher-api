@@ -2,7 +2,7 @@ import { Version } from './Version';
 
 export class Channel {
     name: string;
-    versions!: Version[]
+    versions: Version[] = [];
     
     constructor(name: string) {
         this.name = name;

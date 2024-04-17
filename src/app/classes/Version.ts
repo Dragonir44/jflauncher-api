@@ -24,4 +24,8 @@ export class Version {
     get Path() {
         return this.path;
     }
+
+    get ForgeVersion() {
+        return this.forgeVersion;
+    }
 }
