@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
 import app from './app/index';
 import fs from 'fs';
-import swaggerDocs from './app/routes/swagger';
+import swaggerDocs from './app/routes/swagger.router';
+import { connectToDb } from './app/services/db.service';
+import { init } from './app/services/channel.service';
 
 // load environment variables
 dotenv.config()
@@ -11,9 +13,13 @@ if (fs.existsSync(<string>process.env.TOKEN_FILE)) {
   console.log('Token loaded from file')
 }
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  swaggerDocs(app, Number(PORT));
+connectToDb().then(() => {
+  const PORT = process.env.PORT || 5000;
+  
+  init()
+  
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    swaggerDocs(app, Number(PORT));
+  });
 });
