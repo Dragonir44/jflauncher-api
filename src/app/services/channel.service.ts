@@ -23,6 +23,7 @@ async function readChangelogFiles(path: string) {
 }
 
 const initDB = async () => {
+    console.log("Initializing database")
     try {
         channels.forEach(async (channel) => {
             if (collections.channel && await collections.channel.findOne({ name: channel.ChannelName }) == null) {
