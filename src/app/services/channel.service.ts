@@ -72,6 +72,8 @@ const initDB = async () => {
                     : console.log(`Channel ${channel.ChannelName} not updated`)
             }
         })
+
+        channels = await (collections.channel?.find({}).toArray() as unknown) as Channel[];
     }
     catch (e) {
         console.log(e)
@@ -82,13 +84,11 @@ export const init = async () => {
     
     channels = []
     
-    if (!fs.existsSync(repoPath)) {
+    if (!fs.existsSync(repoPath))
         fs.mkdirSync(repoPath)
-    }
 
-    if (!fs.existsSync("uploads")) {
+    if (!fs.existsSync("uploads"))
         fs.mkdirSync("uploads")
-    }
 
     const repoContent: any = fs.readdirSync(path.join(repoPath))
     
@@ -126,21 +126,25 @@ export const createChannel = (name: string) => {
     fs.mkdirSync(path.join(repoPath, name))
 
     const channel: Channel = new Channel(name)
-    channels.push(channel)
 
-    collections.channel?.insertOne({
+    const newChannel = {
         _id: new ObjectId(),
         name: name,
         versions: []
-    })
+    }
+
+    collections.channel?.insertOne(newChannel)
+
+    channels = collections.channel?.find({}).toArray() as unknown as Channel[]
 
     return channel
 }
 
-export const getChannel = (name: string) => {
-    const channel: Channel = channels.filter((channel: Channel) => channel.ChannelName === name)[0]
+export const getChannel = async (name: string) => {
+    const channel: Channel = await (collections.channel?.findOne({name: name}) as unknown) as Channel
+
     if (channel)
-     return channel
+        return channel
 
     throw new Error("Channel not found")
 }
@@ -152,7 +156,10 @@ export const updateChannel = async (name: string, newName: string) => {
     
     if (fs.existsSync(channelPath)) {
         await fs.renameSync(channelPath, newChannelPath)
-        init()
+        // init()
+        collections.channel?.updateOne({ name: name }, { $set: { name: newName } })
+
+        channels = await (collections.channel?.find({}).toArray() as unknown) as Channel[]
 
         return true
     }
@@ -160,13 +167,17 @@ export const updateChannel = async (name: string, newName: string) => {
     throw new Error("Channel not found")
 }
 
-export const deleteChannel = (name: string) => {
+export const deleteChannel = async (name: string) => {
     
     const channelPath: string = path.join(repoPath, name)
 
     if (fs.existsSync(channelPath)) {
         fs.rmdirSync(channelPath, { recursive: true })
-        init()
+        // init()
+
+        await collections.channel?.deleteOne({name: name})
+
+        channels = await (collections.channel?.find({}).toArray() as unknown) as Channel[]
 
         return true
     }
@@ -233,8 +244,9 @@ export const createVersion = (channel: string, name: string, changelogs: Changel
     return version
 }
 
-export const getVersion = (channel: string, versionName: string) => {
-    return getChannel(channel).Version.filter((version: Version) => version.Version === versionName)[0]
+export const getVersion = async (channel: string, versionName: string) => {
+    const channelData = await getChannel(channel)
+    return channelData.Version.filter((version: Version) => version.Version === versionName)[0]
 }
 
 export const updateVersion = (channelName: string, name: string, newName?: string, changelog?: string, file?: any, forgeVersion?: string) => {
@@ -316,6 +328,7 @@ export const deleteVersion = (channelName: string, name: string) => {
     throw new Error("Version not found")
 }
 
-export const getDownload = (channel: string, versionName: string) => {
-    return getVersion(channel, versionName).Path
+export const getDownload = async(channel: string, versionName: string) => {
+    const channelData = await getVersion(channel, versionName)
+    return channelData.Path
 }

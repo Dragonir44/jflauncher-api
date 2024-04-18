@@ -29,3 +29,25 @@ GET : download the channel version
 token : type string : token generated manually and give to the both side inside a .env file
 name : type string : channel name give by the /channel route
 version : type string : version name give by the /channel/:name route
+
+
+## TODO
+
+- [ ] Change variable logic
+  - [x] Update server repo
+  - [ ] Update service
+    - [x] Init database
+    - [ ] Rework init
+    - [x] Get channels
+    - [x] Create channel
+    - [x] Get channel
+    - [x] Update channel
+    - [ ] Delete channel
+    - [ ] Create version
+    - [ ] Get Version
+    - [ ] Update version
+    - [ ] Delete version
+    - [ ] Get download link
+    - [ ] Add a check to remove old directory
+- [ ] Add news routes
+- [ ] Add server config route

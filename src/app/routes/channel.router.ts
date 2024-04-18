@@ -173,10 +173,10 @@ router.route('/')
  */
 
 router.route('/:channel')
-    .get((req, res) => {
+    .get(async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
             try {
-                res.json(getChannel(req.params.channel));
+                res.json(await getChannel(req.params.channel));
             }
             catch (e: any) {
                 res.status(404).send(`Not Found : ${e.message}`);
@@ -186,11 +186,11 @@ router.route('/:channel')
             res.status(403).send('Forbidden');
         }
     })
-    .put((req, res) => {
+    .put(async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
             try {
-                updateChannel(req.params.channel, req.body.name);
-                res.json(getChannel(req.params.channel));
+                await updateChannel(req.params.channel, req.body.name);
+                res.json(await getChannel(req.body.name));
             }
             catch (e: any) {
                 res.status(404).send(`Not Found : ${e.message}`);
@@ -200,10 +200,10 @@ router.route('/:channel')
             res.status(403).send('Forbidden');
         }
     })
-    .delete((req, res) => {
+    .delete(async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
             try {
-                res.json(deleteChannel(req.params.channel));
+                res.json(await deleteChannel(req.params.channel));
             }
             catch (e: any) {
                 res.status(404).send(`Not Found : ${e.message}`);
@@ -259,10 +259,11 @@ router.route('/:channel')
  */
 
 router.route('/:channel/versions')
-    .get((req, res) => {
+    .get(async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
             try {
-                res.json(getChannel(req.params.channel).versions);
+                const result = await getChannel(req.params.channel);
+                res.json(result.versions);
             }
             catch (e: any) {
                 res.status(404).send(`Not Found : ${e.message}`);
@@ -421,9 +422,9 @@ router.route('/:channel/versions/:version')
     })
 
 router.route('/:channel/versions/:version/download')
-    .get((req, res) => {
+    .get(async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            res.download(path.join(getDownload(req.params.channel, req.params.version)));
+            res.download(path.join(await getDownload(req.params.channel, req.params.version)));
         }
         else {
             res.status(403).send('Forbidden');
