@@ -9,7 +9,7 @@ services:
     environment:
       TZ: Europe/Paris
       TOKEN_FILE: /run/secrets/jfl-api-token
-      MONGO_URI: mongodb://db:27017/jfl
+      MONGO_URI: mongodb://db:27017
     depends_on:
       - db
     secrets:
