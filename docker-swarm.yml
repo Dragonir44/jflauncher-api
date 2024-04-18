@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  web:
+    image: dragonir/jfl-api
+    environment:
+      TZ: Europe/Paris
+      TOKEN_FILE: /run/secrets/jfl-api-token
+      MONGO_URI: mongodb://db:27017
+    secrets:
+      - jfl-api-token
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./test/repo:/app/repo
+    depends_on:
+      - db
+
+  db:
+    image: mongo
+    ports:
+      - "27018:27017"
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+    volumes:
+      - db:/data/db
+
+secrets:
+  jfl-api-token:
+    file: ./secrets/jfl-api-token.txt
+
+volumes:
+  repo:
+  db:
