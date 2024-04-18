@@ -1,6 +1,6 @@
 import { MongoClient, Collection, Db, MongoServerError } from "mongodb";
 import dotenv from "dotenv";
-import News from "../models/News";
+import News from "../models/news";
 import Channel from "../models/channels";
 
 dotenv.config();
