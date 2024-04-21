@@ -185,7 +185,7 @@ export const deleteChannel = async (name: string) => {
     throw new Error("Channel not found")
 }
 
-export const createVersion = (channel: string, name: string, changelogs: Changelog, file: any, forgeVersion: string) => {
+export const createVersion = (channel: string, name: string, changelogEn: string, changelogFr: string, file: any, forgeVersion: string) => {
     
     const channelPath: string = path.join(repoPath, channel)
     const latestVersion: string | boolean | undefined = fs.existsSync(path.join(channelPath, 'latest')) ? fs.readdirSync(path.join(channelPath, 'latest')).find((file: string) => file.endsWith('.zip')) : false
@@ -194,6 +194,12 @@ export const createVersion = (channel: string, name: string, changelogs: Changel
     if (!fs.existsSync(channelPath)) {
         createChannel(channel)
     }
+
+    const changelogs: Changelog = new Changelog(changelogEn, changelogFr)
+
+    // add new version to channel
+
+    collections.channel?.updateOne({ name: channel }, { $push: { versions: { Version: name, Changelog: { En: changelogEn, Fr: changelogFr }, Path: versionPath, ForgeVersion: forgeVersion } } })
 
     // check if new version name is newer than latest version
     if(latestVersion) {
@@ -204,14 +210,6 @@ export const createVersion = (channel: string, name: string, changelogs: Changel
 
             // copy new latest file
             fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, 'latest', `${name}.zip`))
-
-            // replace old changelog with new one
-            if (fs.existsSync(path.join(channelPath, 'latest', 'changelogs')))
-                fs.unlinkSync(path.join(channelPath, 'latest', 'changelogs'))
-
-            for (const changelog of changelogs) {
-                fs.writeFileSync(path.join(channelPath, 'latest', 'changelogs', changelog), changelog)
-            }
         }
     }
     else {
@@ -222,9 +220,6 @@ export const createVersion = (channel: string, name: string, changelogs: Changel
             console.log(e)
         }
         fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(channelPath, 'latest', `${name}.zip`))
-        for (const changelog of changelogs) {
-            fs.writeFileSync(path.join(channelPath, 'latest', 'changelogs', changelog), changelog)
-        }
         fs.writeFileSync(path.join(channelPath, 'latest', forgeVersion), "")
     }
 

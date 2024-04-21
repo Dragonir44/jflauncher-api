@@ -275,7 +275,7 @@ router.route('/:channel/versions')
     })
     .post(upload.array('files', 1), (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            res.json(createVersion(req.params.channel, req.body.name, req.body.changelog, req.files, req.body.forgeVersion));
+            res.json(createVersion(req.params.channel, req.body.name, req.body.changelogEn, req.body.changelogFr, req.files, req.body.forgeVersion));
         }
         else {
             res.status(403).send('Forbidden');
