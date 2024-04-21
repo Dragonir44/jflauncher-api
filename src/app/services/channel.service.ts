@@ -12,13 +12,19 @@ var channels: Channel[] = []
 const repoPath: string = "repo/game"
 
 async function readChangelogFiles(path: string) {
-    if (fs.statSync(path).isDirectory()) {
-        const changelogFiles: any = fs.readdirSync(path)
-        return new Changelog(fs.readFileSync(path + "/" + changelogFiles[0], 'utf8'), fs.readFileSync(path + "/" + changelogFiles[1], 'utf8'))
+    try {
+        if (fs.statSync(path).isDirectory()) {
+            const changelogFiles: any = fs.readdirSync(path)
+            return new Changelog(fs.readFileSync(path + "/" + changelogFiles[0], 'utf8'), fs.readFileSync(path + "/" + changelogFiles[1], 'utf8'))
+        }
+        else {
+            const changelogFiles: any = fs.readFileSync(path, 'utf8')
+            return new Changelog("", changelogFiles)
+        }
     }
-    else {
-        const changelogFiles: any = fs.readFileSync(path, 'utf8')
-        return new Changelog("", changelogFiles)
+    catch (e) {
+        console.log(e)
+        return new Changelog("", "")
     }
 }
 
@@ -85,7 +91,7 @@ export const init = async () => {
     channels = []
     
     if (!fs.existsSync(repoPath))
-        fs.mkdirSync(repoPath)
+        fs.mkdirSync(repoPath, {recursive: true})
 
     if (!fs.existsSync("uploads"))
         fs.mkdirSync("uploads")
@@ -224,10 +230,6 @@ export const createVersion = (channel: string, name: string, changelogEn: string
     }
 
     fs.mkdirSync(versionPath)
-
-    for (const changelog of changelogs) {
-        fs.writeFileSync(path.join(versionPath, "changelog"), changelog)
-    }
     fs.writeFileSync(path.join(versionPath, forgeVersion), "")
     fs.copyFileSync(path.join('uploads', file[0].originalname), path.join(versionPath, `${name}.zip`))
     fs.unlinkSync(path.join('uploads', file[0].originalname))
@@ -241,7 +243,14 @@ export const createVersion = (channel: string, name: string, changelogEn: string
 
 export const getVersion = async (channel: string, versionName: string) => {
     const channelData = await getChannel(channel)
-    return channelData.Version.filter((version: Version) => version.Version === versionName)[0]
+
+    const version = await channelData.versions.filter((version: Version) => {
+        if (version.Version === versionName) {
+            return version
+        }
+    })
+
+    return version[0]
 }
 
 export const updateVersion = (channelName: string, name: string, newName?: string, changelog?: string, file?: any, forgeVersion?: string) => {

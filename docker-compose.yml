@@ -31,7 +31,7 @@ services:
     image: mongo
     restart: unless-stopped
     ports:
-      - "27018:27017"
+      - "27017:27017"
     volumes:
       - db:/data/db
     healthcheck:

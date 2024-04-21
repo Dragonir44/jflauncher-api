@@ -360,10 +360,10 @@ router.route('/:channel/versions')
  */
 
 router.route('/:channel/versions/:version')
-    .get((req, res) => {
+    .get(async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
             try {
-                res.json(getVersion(req.params.channel, req.params.version));
+                res.json(await getVersion(req.params.channel, req.params.version));
             }
             catch (e: any) {
                 res.status(404).send(`Not Found : ${e.message}`);

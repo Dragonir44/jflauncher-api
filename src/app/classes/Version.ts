@@ -16,7 +16,7 @@ export class Version {
     get Version() {
         return this.version;
     }
-
+    
     get Changelog() {
         return this.changelog;
     }

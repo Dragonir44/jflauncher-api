@@ -10,21 +10,26 @@ const dbName = "jfl"
 export const collections: {channel?: Collection<Channel>, news?: Collection<News>} = {};
 
 export const connectToDb = async () => {
-    const client = new MongoClient(process.env.MONGO_URI as string);
+    try {
+        const client = new MongoClient(process.env.MONGO_URI as string);
 
-    await client.connect();
+        await client.connect();
 
-    const db = client.db(dbName);
+        const db = client.db(dbName);
 
-    await applySchemaValidationForChannel(db);
-    await applySchemaValidationForNews(db);
+        await applySchemaValidationForChannel(db);
+        await applySchemaValidationForNews(db);
 
-    collections.channel = db.collection<Channel>("channel");
-    collections.news = db.collection<News>("news");
+        collections.channel = db.collection<Channel>("channel");
+        collections.news = db.collection<News>("news");
 
-    console.log(
-        `Successfully connected to the database : ${db.databaseName} and collections : ${Object.keys(collections).join(", ")}`
-    )
+        console.log(
+            `Successfully connected to the database : ${db.databaseName} and collections : ${Object.keys(collections).join(", ")}`
+        )
+    }
+    catch (error) {
+        console.error(`Error while connecting to the database : ${error}`);
+    }
 }
 
 const applySchemaValidationForChannel = async (db: Db) => {
