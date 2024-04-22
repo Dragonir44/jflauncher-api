@@ -253,9 +253,12 @@ router.route('/:channel')
  *   requestBody:
  *    required: true
  *    content:
- *     application/json:
+ *     multipart/form-data:
  *      schema:
  *       $ref: '#/components/schemas/postVersionRequest'
+ *      encoding:
+ *       files:
+ *        contentType: application/zip
  */
 
 router.route('/:channel/versions')
@@ -373,28 +376,32 @@ router.route('/:channel/versions/:version')
             res.status(403).send('Forbidden');
         }
     })
-    .put(upload.array('files', 1), async (req, res) => {
+    .put(upload.array('files', 1), (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            const { newName, changelog, files, forgeVersion } = req.body
+            const { newName, changelogEn, changelogFr, files, forgeVersion } = req.body
             const { channel, version } = req.params
 
             try {
                 if (newName) {
-                    await updateVersion(channel, version, newName)
+                    updateVersion(channel, version, newName)
                 }
     
-                if (changelog) {
-                    await updateVersion(channel, version, undefined, changelog)
+                if (changelogEn) {
+                    updateVersion(channel, version, undefined, changelogEn)
+                }
+
+                if (changelogFr) {
+                    updateVersion(channel, version, undefined, changelogFr)
                 }
     
                 if (files) {
-                    await updateVersion(channel, version, undefined, undefined, files)
+                    updateVersion(channel, version, undefined, undefined, files)
                 }
                 
                 if (forgeVersion) {
                     if (!new RegExp(/1\.20\.1-[0-9]{2}\.[0-9]{1}\.[0-9]{1,2}/).test(forgeVersion))
                         return res.status(400).send('Bad Request format');
-                    await updateVersion(channel, version, undefined, undefined, undefined, forgeVersion)
+                    updateVersion(channel, version, undefined, undefined, undefined, undefined, forgeVersion)
                 }
     
                 res.json(getVersion(channel, version));
@@ -420,6 +427,41 @@ router.route('/:channel/versions/:version')
             res.status(403).send('Forbidden');
         }
     })
+
+/**
+ * @openapi
+ * /channels/{channel}/versions/{version}/download:
+ *  parameters:
+ *   - in: header
+ *     name: token
+ *     required: true
+ *     schema:
+ *      type: string
+ *      format: uuid
+ *   - in: path
+ *     name: channel
+ *     required: true
+ *     schema:
+ *      type: string
+ *      minimum: 1
+ *   - in: path
+ *     name: version
+ *     required: true
+ *     schema:
+ *      type: string
+ *      minimum: 1
+ *  get:
+ *   tags:
+ *    - Versions
+ *   summary: Download a version
+ *   responses:
+ *    200:
+ *     description: Returns the file
+ *    403:
+ *     description: Forbidden
+ *    404:
+ *     description: Not Found
+ */
 
 router.route('/:channel/versions/:version/download')
     .get(async (req, res) => {

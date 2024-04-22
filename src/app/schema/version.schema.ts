@@ -24,30 +24,26 @@
  *     $ref: '#/components/schemas/getVersionResponse'
  *   postVersionRequest:
  *    type: object
- *    required:
- *     - version
- *     - changelog
- *     - download
- *     - forgeVersion
  *    properties:
- *     version:
- *      type: string
- *      default: "1.0.0"
- *     changelog:
- *      type: object
- *      properties:
- *       en:
- *        type: string
- *        default: "Initial release"
- *       fr:
- *        type: string
- *        default: "Première version"
- *     download:
- *      type: string
- *      default: "repo\\release\\1.0.0\\v1.0.0.zip"
- *     forgeVersion:
- *      type: string
- *      default: "1.20.1-42.2.21"
+ *      version:
+ *       type: string
+ *       default: "1.0.0"
+ *      changelog:
+ *       type: object
+ *       properties:
+ *        en:
+ *         type: string
+ *         default: "Initial release"
+ *        fr:
+ *         type: string
+ *         default: "Première version"
+ *      files:
+ *       type: string
+ *       format: binary
+ *      forgeVersion:
+ *       type: string
+ *       default: "1.20.1-42.2.21"
+ *    
  *   postVersionResponse:
  *    $ref: '#/components/schemas/getVersionResponse'
  *   putVersionRequest:
