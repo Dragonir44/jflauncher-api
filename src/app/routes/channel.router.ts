@@ -276,9 +276,14 @@ router.route('/:channel/versions')
             res.status(403).send('Forbidden');
         }
     })
-    .post(upload.array('files', 1), (req, res) => {
+    .post(upload.array('files', 1), async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            res.json(createVersion(req.params.channel, req.body.name, req.body.changelogEn, req.body.changelogFr, req.files, req.body.forgeVersion));
+            try {
+                res.json(await createVersion(req.params.channel, req.body.name, req.body.changelogEn, req.body.changelogFr, req.files, req.body.forgeVersion));
+            }
+            catch (e: any) {
+                res.status(400).send(`Bad request : ${e.message}`);
+            }
         }
         else {
             res.status(403).send('Forbidden');
@@ -376,7 +381,7 @@ router.route('/:channel/versions/:version')
             res.status(403).send('Forbidden');
         }
     })
-    .put(upload.array('files', 1), (req, res) => {
+    .put(upload.array('files', 1), async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
             const { newName, changelogEn, changelogFr, files, forgeVersion } = req.body
             const { channel, version } = req.params
@@ -404,7 +409,7 @@ router.route('/:channel/versions/:version')
                     updateVersion(channel, version, undefined, undefined, undefined, undefined, forgeVersion)
                 }
     
-                res.json(getVersion(channel, version));
+                res.json("Version updated");
             }
             catch (e: any) {
                 res.status(404).send(`Not Found : ${e.message}`);
@@ -414,10 +419,10 @@ router.route('/:channel/versions/:version')
             res.status(403).send('Forbidden');
         }
     })
-    .delete((req, res) => {
+    .delete(async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
             try {
-                res.json(deleteVersion(req.params.channel, req.params.version));
+                res.json(await deleteVersion(req.params.channel, req.params.version));
             }
             catch (e: any) {
                 res.status(404).send(`Not Found : ${e.message}`);
