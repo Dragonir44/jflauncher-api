@@ -33,11 +33,11 @@ version : type string : version name give by the /channel/:name route
 
 ## TODO
 
-- [ ] Change variable logic
+- [x] Change variable logic
   - [x] Update server repo
-  - [ ] Update service
+  - [x] Update service
     - [x] Init database
-    - [ ] Rework init
+    - [x] Rework init
     - [x] Get channels
     - [x] Create channel
     - [x] Get channel
@@ -47,7 +47,7 @@ version : type string : version name give by the /channel/:name route
     - [x] Get Version
     - [x] Update version
     - [x] Delete version
-    - [ ] Get download link
-    - [ ] Add a check to remove old directory
+    - [x] Get download link
+    - [x] Add a check to remove old directory
 - [ ] Add news routes
 - [ ] Add server config route
