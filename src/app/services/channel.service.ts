@@ -224,16 +224,16 @@ export const updateVersion = async (channelName: string, name: string, newName?:
             }
         }
 
-        if ((changelogEn || changelogFr) && !fs.existsSync(path.join(versionPath, 'changelogs'))) {
-            fs.mkdirSync(path.join(versionPath, 'changelogs'))
+        if ((changelogEn || changelogFr) && !fs.existsSync(path.join(channelPath, newName ? newName : name, 'changelogs'))) {
+            fs.mkdirSync(path.join(channelPath, newName ? newName : name, 'changelogs'))
         }
     
         if (changelogEn) {
-            fs.writeFileSync(path.join(channelPath, newName ? newName : name, "changelogs"), changelogEn)
+            fs.writeFileSync(path.join(channelPath, newName ? newName : name, "changelogs", "en"), changelogEn)
         }
 
         if (changelogFr) {
-            fs.writeFileSync(path.join(channelPath, newName ? newName : name, "changelogs"), changelogFr)
+            fs.writeFileSync(path.join(channelPath, newName ? newName : name, "changelogs", "fr"), changelogFr)
         }
     
         if (file) {

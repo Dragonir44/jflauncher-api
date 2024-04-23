@@ -388,28 +388,28 @@ router.route('/:channel/versions/:version')
 
             try {
                 if (newName) {
-                    updateVersion(channel, version, newName)
+                    await updateVersion(channel, version, newName)
                 }
     
                 if (changelogEn) {
-                    updateVersion(channel, version, undefined, changelogEn)
+                    await updateVersion(channel, version, undefined, changelogEn)
                 }
 
                 if (changelogFr) {
-                    updateVersion(channel, version, undefined, changelogFr)
+                    await updateVersion(channel, version, undefined, undefined, changelogFr)
                 }
     
                 if (files) {
-                    updateVersion(channel, version, undefined, undefined, files)
+                    await updateVersion(channel, version, undefined, undefined, undefined, files)
                 }
                 
                 if (forgeVersion) {
                     if (!new RegExp(/1\.20\.1-[0-9]{2}\.[0-9]{1}\.[0-9]{1,2}/).test(forgeVersion))
                         return res.status(400).send('Bad Request format');
-                    updateVersion(channel, version, undefined, undefined, undefined, undefined, forgeVersion)
+                    await updateVersion(channel, version, undefined, undefined, undefined, undefined, forgeVersion)
                 }
     
-                res.json("Version updated");
+                res.json({message: "Version updated"});
             }
             catch (e: any) {
                 res.status(404).send(`Not Found : ${e.message}`);
