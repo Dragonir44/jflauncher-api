@@ -42,11 +42,11 @@ version : type string : version name give by the /channel/:name route
     - [x] Create channel
     - [x] Get channel
     - [x] Update channel
-    - [ ] Delete channel
-    - [ ] Create version
-    - [ ] Get Version
-    - [ ] Update version
-    - [ ] Delete version
+    - [x] Delete channel
+    - [x] Create version
+    - [x] Get Version
+    - [x] Update version
+    - [x] Delete version
     - [ ] Get download link
     - [ ] Add a check to remove old directory
 - [ ] Add news routes
