@@ -88,17 +88,17 @@ const router = express.Router();
 
 
 router.route('/')
-    .get((req, res) => {
+    .get(async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            res.json(getChannels());
+            res.json(await getChannels());
         }
         else {
             res.status(403).send('Forbidden');
         }
     })
-    .post((req, res) => {
+    .post(async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            res.json(createChannel(req.body.name));
+            res.json(await createChannel(req.body.name));
         }
         else {
             res.status(403).send('Forbidden');
@@ -273,9 +273,9 @@ router.route('/:channel/versions')
             res.status(403).send('Forbidden');
         }
     })
-    .post(upload.array('files', 1), (req, res) => {
+    .post(upload.array('files', 1), async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            res.json(createVersion(req.params.channel, req.body.name, req.body.changelogEn, req.body.changelogFr, req.files, req.body.forgeVersion));
+            res.json(await createVersion(req.params.channel, req.body.name, req.body.changelogEn, req.body.changelogFr, req.files, req.body.forgeVersion));
         }
         else {
             res.status(403).send('Forbidden');
@@ -375,29 +375,25 @@ router.route('/:channel/versions/:version')
     })
     .put(upload.array('files', 1), async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            const { newName, changelog, files, forgeVersion } = req.body
+            const { newName, changelogEn, changelogFr, files, forgeVersion } = req.body
             const { channel, version } = req.params
 
             try {
-                if (newName) {
-                    await updateVersion(channel, version, newName)
-                }
-    
-                if (changelog) {
-                    await updateVersion(channel, version, undefined, changelog)
-                }
-    
-                if (files) {
-                    await updateVersion(channel, version, undefined, undefined, files)
-                }
+
+                if (forgeVersion && !new RegExp(/1\.20\.1-[0-9]{2}\.[0-9]{1}\.[0-9]{1,2}/).test(forgeVersion))
+                    return res.status(400).send('Bad Request format');
+
+                await updateVersion(
+                    channel, 
+                    version, 
+                    newName || undefined, 
+                    changelogEn || undefined, 
+                    changelogFr || undefined, 
+                    files || undefined, 
+                    forgeVersion || undefined
+                )
                 
-                if (forgeVersion) {
-                    if (!new RegExp(/1\.20\.1-[0-9]{2}\.[0-9]{1}\.[0-9]{1,2}/).test(forgeVersion))
-                        return res.status(400).send('Bad Request format');
-                    await updateVersion(channel, version, undefined, undefined, undefined, forgeVersion)
-                }
-    
-                res.json(getVersion(channel, version));
+                res.json(await getVersion(channel, version));
             }
             catch (e: any) {
                 res.status(404).send(`Not Found : ${e.message}`);
@@ -407,10 +403,10 @@ router.route('/:channel/versions/:version')
             res.status(403).send('Forbidden');
         }
     })
-    .delete((req, res) => {
+    .delete(async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
             try {
-                res.json(deleteVersion(req.params.channel, req.params.version));
+                res.json(await deleteVersion(req.params.channel, req.params.version));
             }
             catch (e: any) {
                 res.status(404).send(`Not Found : ${e.message}`);
