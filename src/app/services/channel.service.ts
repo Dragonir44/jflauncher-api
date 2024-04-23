@@ -77,8 +77,6 @@ const initDB = async (channels: Channel[]) => {
                     : console.log(`Channel ${channel.ChannelName} not updated`)
             }
         })
-
-        channels = await (collections.channel?.find({}).toArray() as unknown) as Channel[];
     }
     catch (e) {
         console.log(e)
@@ -86,8 +84,9 @@ const initDB = async (channels: Channel[]) => {
 }
 
 export const init = async () => {
-    
     const channels: Channel[] = []
+    const repoRoot = fs.readdirSync("repo")
+    const repoContent: any = fs.readdirSync(path.join(repoPath))
     
     if (!fs.existsSync(repoPath))
         fs.mkdirSync(repoPath, {recursive: true})
@@ -95,24 +94,29 @@ export const init = async () => {
     if (!fs.existsSync("uploads"))
         fs.mkdirSync("uploads")
 
-    const repoContent: any = fs.readdirSync(path.join(repoPath))
+    // Read all folders in repo folder and move into game folder all folders exept news and game folder
+    for(const folderName of repoRoot) {
+        if (folderName !== "game" && folderName !== "news") {
+            fs.renameSync(path.join("repo", folderName), path.join(repoPath, folderName))
+        }
+    }
     
     for(const folderName of repoContent) {
-        const folderPath: string = path.join(repoPath, folderName)
-        const folderContent: any = fs.readdirSync(folderPath)
+        const folderContent: any = fs.readdirSync(path.join(repoPath, folderName))
         const channel: Channel = new Channel(folderName)
         let fileContent: Changelog = new Changelog("", "")
         
         for(const subFolderName of folderContent) {
-            const regex = new RegExp(/.*\.zip$/)
-            const filePath: string = fs.readdirSync(path.join(repoPath, folderName, subFolderName)).filter((file: string) => regex.test(file))[0]
+            const filePath: string = fs.readdirSync(path.join(repoPath, folderName, subFolderName)).filter((file: string) => new RegExp(/.*\.zip$/).test(file))[0]
             const changelog: any = fs.existsSync(path.join(repoPath, folderName, subFolderName, "changelogs")) 
                 ? path.join(repoPath, folderName, subFolderName, "changelogs") 
                 : fs.existsSync(path.join(repoPath, folderName, subFolderName, "changelog"))
                     ? path.join(repoPath, folderName, subFolderName, "changelog")
                     : false
-            if (changelog)
+            if (changelog){
                 fileContent = await readChangelogFiles(changelog)
+                fs.rmSync(changelog, { recursive: true })
+            }
             const forgeVersion: string = fs.readdirSync(path.join(repoPath, folderName, subFolderName)).filter((file: string) => new RegExp(/[0-9]{2}\.[0-9]{1}\.[0-9]{2}/).test(file))[0]
             const version: Version = new Version(subFolderName, fileContent, path.join(repoPath, folderName, subFolderName, filePath), forgeVersion)
             channel.Version = version

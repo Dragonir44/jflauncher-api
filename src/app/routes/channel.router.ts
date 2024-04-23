@@ -420,7 +420,12 @@ router.route('/:channel/versions/:version')
 router.route('/:channel/versions/:version/download')
     .get(async (req, res) => {
         if (req.headers['token'] === process.env.TOKEN) {
-            res.download(path.join(await getDownload(req.params.channel, req.params.version)));
+            try {
+                res.download(path.join(await getDownload(req.params.channel, req.params.version)));
+            }
+            catch (e: any) {
+                res.status(404).send(`Not Found : ${e.message}`);
+            }
         }
         else {
             res.status(403).send('Forbidden');
