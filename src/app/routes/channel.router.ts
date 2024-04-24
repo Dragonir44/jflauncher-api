@@ -17,9 +17,6 @@ import {
     getDownload
 } from '../services/channel.service';
 
-import { getVersionResponse } from '../schema/channel.schema';
-
-
 const storage = multer.diskStorage({ // Initialise le stockage des fichiers
     destination: function (req, file, cb) { // Définit le chemin de destination des fichiers
         if (fs.existsSync('uploads/') === false) fs.mkdirSync('uploads/')
