@@ -96,24 +96,42 @@ const applySchemaValidationForChannel = async (db: Db) => {
 const applySchemaValidationForNews = async (db: Db) => {
     const jsonSchema = {
         bsonType: ["object"],
-        required: ["title", "content", "date"],
+        required: ["_id", "lang", "date"],
         properties: {
             _id: {},
-            title: {
-                bsonType: ["string"],
-                description: "News title"
-            },
-            content: {
+            lang: {
                 bsonType: ["object"],
                 required: ["en", "fr"],
                 properties: {
-                    En: {
-                        bsonType: ["string"],
-                        description: "Content in English"
+                    en: {
+                        bsonType: ["object"],
+                        required: ["title", "content"],
+                        description: "Content in English",
+                        properties: {
+                            title: {
+                                bsonType: ["string"],
+                                description: "Title in English"
+                            },
+                            content: {
+                                bsonType: ["string"],
+                                description: "Content in English"
+                            }
+                        }
                     },
-                    Fr: {
-                        bsonType: ["string"],
-                        description: "Content in French"
+                    fr: {
+                        bsonType: ["object"],
+                        required: ["title", "content"],
+                        description: "Content in French",
+                        properties: {
+                            title: {
+                                bsonType: ["string"],
+                                description: "Title in French"
+                            },
+                            content: {
+                                bsonType: ["string"],
+                                description: "Content in French"
+                            }
+                        }
                     }
                 }
             },

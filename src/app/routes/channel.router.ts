@@ -62,8 +62,8 @@ const router = express.Router();
  *      application/json:
  *       schema:
  *        $ref: '#/components/schemas/getChannelsResponse'
- *    403:
- *     description: Forbidden
+ *    401:
+ *     description: Unauthorized
  *  post:
  *   tags:
  *    - Channels
@@ -81,8 +81,8 @@ const router = express.Router();
  *      application/json:
  *       schema:
  *        $ref: '#/components/schemas/postChannelResponse'
- *    403:
- *     description: Forbidden
+ *    401:
+ *     description: Unauthorized
  *  
  */
 
@@ -93,7 +93,7 @@ router.route('/')
             res.json(await getChannels());
         }
         else {
-            res.status(403).send('Forbidden');
+            res.status(401).send('Unauthorized');
         }
     })
     .post(async (req, res) => {
@@ -101,7 +101,7 @@ router.route('/')
             res.json(await createChannel(req.body.name));
         }
         else {
-            res.status(403).send('Forbidden');
+            res.status(401).send('Unauthorized');
         }
     })
 
@@ -132,8 +132,8 @@ router.route('/')
  *      application/json:
  *       schema:
  *        $ref: '#/components/schemas/getChannelResponse'
- *    403:
- *     description: Forbidden
+ *    401:
+ *     description: Unauthorized
  *    404:
  *     description: Not Found
  * 
@@ -154,8 +154,8 @@ router.route('/')
  *      application/json:
  *       schema:
  *        $ref: '#/components/schemas/postChannelResponse'
- *    403:
- *     description: Forbidden
+ *    401:
+ *     description: Unauthorized
  *    404:
  *     description: Not Found
  * 
@@ -166,8 +166,8 @@ router.route('/')
  *   responses:
  *    200:
  *     description: Success
- *    403:
- *     description: Forbidden
+ *    401:
+ *     description: Unauthorized
  *    404:
  *     description: Not Found
  */
@@ -183,7 +183,7 @@ router.route('/:channel')
             }
         }
         else {
-            res.status(403).send('Forbidden');
+            res.status(401).send('Unauthorized');
         }
     })
     .put(async (req, res) => {
@@ -197,7 +197,7 @@ router.route('/:channel')
             }
         }
         else {
-            res.status(403).send('Forbidden');
+            res.status(401).send('Unauthorized');
         }
     })
     .delete(async (req, res) => {
@@ -210,7 +210,7 @@ router.route('/:channel')
             }
         }
         else {
-            res.status(403).send('Forbidden');
+            res.status(401).send('Unauthorized');
         }
     })
 
@@ -241,8 +241,8 @@ router.route('/:channel')
  *      application/json:
  *       schema:
  *        $ref: '#/components/schemas/getVersionsResponse'
- *   403:
- *    description: Forbidden
+ *   401:
+ *    description: Unauthorized
  *   404:
  *    description: Not Found
  * 
@@ -270,7 +270,7 @@ router.route('/:channel/versions')
             }
         }
         else {
-            res.status(403).send('Forbidden');
+            res.status(401).send('Unauthorized');
         }
     })
     .post(upload.array('files', 1), async (req, res) => {
@@ -278,7 +278,7 @@ router.route('/:channel/versions')
             res.json(await createVersion(req.params.channel, req.body.name, req.body.changelogEn, req.body.changelogFr, req.files, req.body.forgeVersion));
         }
         else {
-            res.status(403).send('Forbidden');
+            res.status(401).send('Unauthorized');
         }
     })
 
@@ -315,8 +315,8 @@ router.route('/:channel/versions')
  *      application/json:
  *       schema:
  *        $ref: '#/components/schemas/getVersionResponse'
- *    403:
- *     description: Forbidden
+ *    401:
+ *     description: Unauthorized
  *    404:
  *     description: Not Found
  * 
@@ -337,8 +337,8 @@ router.route('/:channel/versions')
  *      application/json:
  *       schema:
  *        $ref: '#/components/schemas/putVersionResponse'
- *    403:
- *     description: Forbidden
+ *    401:
+ *     description: Unauthorized
  *    404:
  *     description: Not Found
  * 
@@ -353,8 +353,8 @@ router.route('/:channel/versions')
  *      application/json:
  *       schema:
  *        $ref: '#/components/schemas/deleteVersionResponse'
- *    403:
- *     description: Forbidden
+ *    401:
+ *     description: Unauthorized
  *    404:
  *     description: Not Found
  */
@@ -370,7 +370,7 @@ router.route('/:channel/versions/:version')
             }
         }
         else {
-            res.status(403).send('Forbidden');
+            res.status(401).send('Unauthorized');
         }
     })
     .put(upload.array('files', 1), async (req, res) => {
@@ -400,7 +400,7 @@ router.route('/:channel/versions/:version')
             }
         }
         else {
-            res.status(403).send('Forbidden');
+            res.status(401).send('Unauthorized');
         }
     })
     .delete(async (req, res) => {
@@ -413,7 +413,7 @@ router.route('/:channel/versions/:version')
             }
         }
         else {
-            res.status(403).send('Forbidden');
+            res.status(401).send('Unauthorized');
         }
     })
 
@@ -428,7 +428,7 @@ router.route('/:channel/versions/:version/download')
             }
         }
         else {
-            res.status(403).send('Forbidden');
+            res.status(401).send('Unauthorized');
         }
     })
 
