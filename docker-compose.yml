@@ -9,7 +9,6 @@ services:
     environment:
       TZ: Europe/Paris
       TOKEN_FILE: /run/secrets/jfl-api-token
-      MONGO_URI: mongodb://db:27017
     depends_on:
       - db
     secrets:
@@ -25,23 +24,7 @@ services:
       timeout: 30s
       retries: 5
       start_period: 30s
-  
-  db:
-    container_name: "jfl-db"
-    image: mongo
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    volumes:
-      - db:/data/db
-    healthcheck:
-      test: "mongosh --quiet 127.0.0.1/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'"
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
     
-
 secrets:
   jfl-api-token:
     file: ./secrets/jfl-api-token.txt
