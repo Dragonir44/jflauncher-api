@@ -16,7 +16,6 @@ COPY ./package.json ./package.json
 
 RUN echo "PORT=5000" > .env
 RUN echo "TOKEN_FILE=${TOKEN_FILE}" >> .env
-RUN echo "MONGO_URI=${MONGO_URI}" >> .env
 
 EXPOSE 5000
 
