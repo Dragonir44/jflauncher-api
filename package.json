@@ -1,6 +1,6 @@
 {
   "name": "jflauncher-api",
-  "version": "1.3.1",
+  "version": "1.3.6",
   "description": "Listing and download modpack version api",
   "main": "dist/server.js",
   "repository": "https://github.com/dragonir44/jflauncher-api",
