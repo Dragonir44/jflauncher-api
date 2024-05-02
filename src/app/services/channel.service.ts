@@ -282,7 +282,7 @@ export const createVersion = async(channel: string, name: string, changelogEn: s
                     En: changelogEn, 
                     Fr: changelogFr 
                 }, 
-                Path: versionPath, 
+                Path: `${versionPath}/${name}.zip`, 
                 ForgeVersion: forgeVersion 
             } 
         } 
