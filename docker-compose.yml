@@ -2,7 +2,7 @@ version: '3.3'
 services:
   web:
     container_name: "jfl-api"
-    image: dragonir/jfl-api:v1.3.3-mongo
+    image: dragonir/jfl-api:v1.3.6-mongo
     # build:
     #   context: .
     #   dockerfile: dockerfile
