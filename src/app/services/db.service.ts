@@ -47,31 +47,31 @@ const applySchemaValidationForChannel = async (db: Db) => {
                 description: "List of versions",
                 items: {
                     bsonType: ["object"],
-                    required: ["Version", "Changelog", "Path", "ForgeVersion"],
+                    required: ["version", "changelog", "path", "forgeVersion"],
                     properties: {
-                        Version: {
+                        version: {
                             bsonType: ["string"],
                             description: "Version number"
                         },
-                        Changelog: {
+                        changelog: {
                             bsonType: ["object"],
-                            required: ["En", "Fr"],
+                            required: ["en", "fr"],
                             properties: {
-                                En: {
+                                en: {
                                     bsonType: ["string"],
                                     description: "Changelog in English"
                                 },
-                                Fr: {
+                                fr: {
                                     bsonType: ["string"],
                                     description: "Changelog in French"
                                 }
                             }
                         },
-                        Path: {
+                        path: {
                             bsonType: ["string"],
                             description: "Path to the version file"
                         },
-                        ForgeVersion: {
+                        forgeVersion: {
                             bsonType: ["string"],
                             description: "Forge version"
                         }

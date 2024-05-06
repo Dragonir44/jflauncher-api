@@ -37,13 +37,13 @@ const initDB = async (channels: Channel[]) => {
                     name: channel.ChannelName,
                     versions: channel.Version.map((version: Version) => {
                         return {
-                            Version: version.Version,
-                            Changelog: {
-                                En: version.Changelog.En,
-                                Fr: version.Changelog.Fr
+                            version: version.Version,
+                            changelog: {
+                                en: version.Changelog.En,
+                                fr: version.Changelog.Fr
                             },
-                            Path: version.Path,
-                            ForgeVersion: version.ForgeVersion
+                            path: version.Path,
+                            forgeVersion: version.ForgeVersion
                         }
                     })
                 }
@@ -59,13 +59,13 @@ const initDB = async (channels: Channel[]) => {
                     name: channel.ChannelName,
                     versions: channel.Version.map((version: Version) => {
                         return {
-                            Version: version.Version,
-                            Changelog: {
-                                En: version.Changelog.En,
-                                Fr: version.Changelog.Fr
+                            version: version.Version,
+                            changelog: {
+                                en: version.Changelog.En,
+                                fr: version.Changelog.Fr
                             },
-                            Path: version.Path,
-                            ForgeVersion: version.ForgeVersion
+                            path: version.Path,
+                            forgeVersion: version.ForgeVersion
                         }
                     })
                 }
@@ -221,17 +221,17 @@ export const createVersion = async(channel: string, name: string, changelogEn: s
         }, 
         { 
             $set: { 
-                "versions.$[element].Version": 'latest', 
-                "versions.$[element].Changelog": { 
-                    En: changelogEn, 
-                    Fr: changelogFr 
+                "versions.$[element].version": 'latest', 
+                "versions.$[element].changelog": { 
+                    en: changelogEn, 
+                    fr: changelogFr 
                 }, 
-                "versions.$[element].Path": path.join(channelPath, 'latest', `${name}.zip`), 
-                "versions.$[element].ForgeVersion": forgeVersion 
+                "versions.$[element].path": path.join(channelPath, 'latest', `${name}.zip`), 
+                "versions.$[element].forgeVersion": forgeVersion 
             } 
         },
         { 
-            arrayFilters: [{ "element.Version": 'latest' }] 
+            arrayFilters: [{ "element.version": 'latest' }] 
         })
         
     }
@@ -251,13 +251,13 @@ export const createVersion = async(channel: string, name: string, changelogEn: s
         { 
             $push: { 
                 versions: { 
-                    Version: 'latest', 
-                    Changelog: { 
-                        En: changelogEn, 
-                        Fr: changelogFr 
+                    version: 'latest', 
+                    changelog: { 
+                        en: changelogEn, 
+                        fr: changelogFr 
                     }, 
-                    Path: path.join(channelPath, 'latest', `${name}.zip`), 
-                    ForgeVersion: forgeVersion 
+                    path: path.join(channelPath, 'latest', `${name}.zip`), 
+                    forgeVersion: forgeVersion 
                 } 
             } 
         })
@@ -277,13 +277,13 @@ export const createVersion = async(channel: string, name: string, changelogEn: s
     { 
         $push: { 
             versions: { 
-                Version: name, 
-                Changelog: { 
-                    En: changelogEn, 
-                    Fr: changelogFr 
+                version: name, 
+                changelog: { 
+                    en: changelogEn, 
+                    fr: changelogFr 
                 }, 
-                Path: `${versionPath}/${name}.zip`, 
-                ForgeVersion: forgeVersion 
+                path: `${versionPath}/${name}.zip`, 
+                forgeVersion: forgeVersion 
             } 
         } 
     })
@@ -294,12 +294,12 @@ export const createVersion = async(channel: string, name: string, changelogEn: s
 export const getVersion = async (channel: string, versionName: string) => {
     const channelData = await collections.channel?.findOne({
         name: channel,
-        "versions.Version": versionName
+        "versions.version": versionName
     })
     console.log("test", channelData)
     if (channelData){
         for (const version of channelData?.versions) {
-            if (version.Version === versionName) {
+            if (version.version === versionName) {
                 return version
             }
         }
@@ -389,7 +389,7 @@ export const deleteVersion = async (channelName: string, name: string) => {
         }, {
             $pull: {
                 versions: {
-                    Version: name
+                    version: name
                 }
             }
         })
@@ -420,11 +420,11 @@ export const deleteVersion = async (channelName: string, name: string) => {
                 name: channelName
             }, {
                 $set: {
-                    "versions.$[element].Version": 'latest',
-                    "versions.$[element].Path": path.join(channelPath, 'latest', `${lastVersion}.zip`)
+                    "versions.$[element].version": 'latest',
+                    "versions.$[element].path": path.join(channelPath, 'latest', `${lastVersion}.zip`)
                 }
             }, {
-                arrayFilters: [{ "element.Version": 'latest' }]
+                arrayFilters: [{ "element.version": 'latest' }]
             })
         }
        
@@ -436,5 +436,5 @@ export const deleteVersion = async (channelName: string, name: string) => {
 
 export const getDownload = async(channel: string, versionName: string) => {
     const channelData = await getVersion(channel, versionName)
-    return channelData.Path
+    return channelData.path
 }
