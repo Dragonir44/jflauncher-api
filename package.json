@@ -10,6 +10,7 @@
   "scripts": {
     "start": "cross-env NODE_ENV=production node dist/server.js",
     "dev": "cross-env NODE_ENV=dev nodemon --exec ts-node src/server.ts --watch src --ext ts",
+    "updateDB": "node dist/script/updateDocument.js",
     "build": "tsc -p ."
   },
   "dependencies": {
