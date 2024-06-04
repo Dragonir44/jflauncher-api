@@ -1,0 +1,26 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build_job:
+  stage: build
+  script:
+    - echo "Building the application..."
+
+test_job:
+  stage: test
+  script:
+    - echo "Running tests..."
+    - npm install
+    - npm build
+    - npm start
+    - curl -sL http://localhost:5000/health
+
+deploy_job:
+  stage: deploy
+  script:
+    - echo "Deploying the application..."
+    - docker build . -t $APP_NAME -t $APP_NAME:$APP_VERSION
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker push $APP_NAME && docker push $APP_NAME:$APP_VERSION
